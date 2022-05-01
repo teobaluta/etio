@@ -77,7 +77,6 @@ plt.scatter(cluster2['AccDiff'], cluster2['Oak17Acc'])
 plt.scatter(cluster3['AccDiff'], cluster3['Oak17Acc'])
 plt.savefig('fig1-confounders.png')
 pd.set_option('display.max_rows', None)
-import pdb; pdb.set_trace()
 
 # Check the average treatment effect
 pd.crosstab(df.Oak17Acc, df.AccDiff, margins=True, normalize='columns')['All'].sum()
@@ -88,19 +87,23 @@ mindiff_cond = df.loc[(np.abs(df['AccDiff'] - min_accdiff) < 0.001)]
 cond_avg = maxdiff_cond['Oak17Acc'].mean() - mindiff_cond['Oak17Acc'].mean()
 print('Estimated conditional expectation E[Attack|AccDiff=min->max] {}'.format(cond_avg))
 
-# max_numparams = dataset['NumParams'].max()
-# min_numparams = dataset['NumParams'].min()
-# mindiff_cond = dataset.loc[(np.abs(dataset['NumParams'] - min_numparams) < 0.001)]
-# maxdiff_cond = dataset.loc[(np.abs(dataset['NumParams'] - max_numparams) < 0.001)]
-# mindiff_cond['Oak17Acc'].mean()
-# maxdiff_cond['Oak17Acc'].mean()
-# mindiff_cond = dataset.loc[(np.abs(dataset['NumParams'] - min_numparams) < 0.0001)]
-# maxdiff_cond = dataset.loc[(np.abs(dataset['NumParams'] - max_numparams) < 0.0001)]
-# maxdiff_cond = dataset.loc[(np.abs(dataset['AccDiff'] - max_accdiff) < 0.001)]
+max_numparams = df['NumParams'].max()
+min_numparams = df['NumParams'].min()
+mindiff_cond = df.loc[(np.abs(df['NumParams'] - min_numparams) < 0.001)]
+maxdiff_cond = df.loc[(np.abs(df['NumParams'] - max_numparams) < 0.001)]
+mindiff_cond['Oak17Acc'].mean()
+maxdiff_cond['Oak17Acc'].mean()
+cond_avg = maxdiff_cond['Oak17Acc'].mean() - mindiff_cond['Oak17Acc'].mean()
+print('Estimated conditional expectation E[Attack|NumParams=min->max] {}'.format(cond_avg))
 
-# dataset.loc[(np.abs(dataset['AccDiff'] - 0.2) < 0.001)]
-# dataset.loc[(np.abs(dataset['AccDiff'] - 0.2) < 0.1)]
-# dataset.loc[(np.abs(dataset['AccDiff'] - 0.1) < 0.1)]
-# dataset.loc[(np.abs(dataset['AccDiff'] - 0.1) < 0.01)]
-# around01 = dataset.loc[(np.abs(dataset['AccDiff'] - 0.1) < 0.01)]
+# mindiff_cond = df.loc[(np.abs(df['NumParams'] - min_numparams) < 0.0001)]
+# maxdiff_cond = df.loc[(np.abs(df['NumParams'] - max_numparams) < 0.0001)]
+# maxdiff_cond = df.loc[(np.abs(df['AccDiff'] - max_accdiff) < 0.001)]
+
+# df.loc[(np.abs(df['AccDiff'] - 0.2) < 0.001)]
+# df.loc[(np.abs(df['AccDiff'] - 0.2) < 0.1)]
+# df.loc[(np.abs(df['AccDiff'] - 0.1) < 0.1)]
+# df.loc[(np.abs(df['AccDiff'] - 0.1) < 0.01)]
+# around01 = df.loc[(np.abs(df['AccDiff'] - 0.1) < 0.01)]
 # around01[['NumParams','AccDiff','Oak17Acc']]
+# print(around01)
