@@ -159,6 +159,112 @@ def run_dml_estimate(model, identified_estimand, control_value, treatment_value)
 
     return dml_estimate
 
+def run_example_1_paper(dataset, wd):
+    df = pd.read_csv(dataset, skip_blank_lines=True)
+    df = df.loc[df['WeightDecay'] == wd]
+    df.rename(columns={'CentroidDistance(origin)': 'CentroidDistance.origin.',
+                       'CentroidDistance(sorted_3)': 'CentroidDistance'},
+              inplace=True)
+    loss_df = df.loc[df['Loss'] == "ce"]
+    # draw graph
+    attack = 'Oak17Acc'
+    nodes = ['AccDiff', 'NumParams'] + [attack]
+    graph1 = """
+        digraph {
+            AccDiff;
+            NumParams;
+            Oak17Acc;
+            NumParams -> AccDiff;
+            NumParams -> Oak17Acc;
+            AccDiff -> Oak17Acc;
+        }
+        """
+    VARS = nodes
+    current_df  = loss_df[nodes].copy()
+    current_df[["NumParams"]] = current_df[["NumParams"]].apply(pd.to_numeric)
+    scaler = sklearn.preprocessing.StandardScaler()
+    current_df[VARS] = scaler.fit_transform(current_df[VARS])
+
+    # normalize the data
+    scaler = sklearn.preprocessing.MinMaxScaler()
+    current_df[VARS] = scaler.fit_transform(current_df[VARS])
+
+    print(current_df)
+    model1 = CausalModel(
+        data=current_df,
+        treatment='AccDiff',
+        treatment_is_binary=False,
+        outcome=attack,
+        graph=graph1.replace("\n", " "))
+
+    #model1.view_model() #file_name='dowhy-{}-causal_model.png'.format(attack))
+    model1.view_model(file_name='example_1_1-{}-causal_model'.format(attack))
+
+    # II. Identify causal effect and return target estimands
+    identified_estimand = model1.identify_effect(proceed_when_unidentifiable=True)
+    print('Identified estimand: {}'. format(identified_estimand))
+
+    print('='*60)
+    # III. Estimate the target estimand using a statistical method.
+    # propensity_score only for binary treatment variables
+    causal_estimate = model1.estimate_effect(identified_estimand,
+                                            method_name="backdoor.linear_regression",
+                                            control_value=min(current_df['AccDiff']),
+                                            treatment_value=max(current_df['AccDiff']),
+                                            confidence_intervals=True,
+                                            test_significance=True)
+    print("Causal Estimate is")
+    print(causal_estimate)
+    graph2 = """
+        digraph {
+            AccDiff;
+            NumParams;
+            Oak17Acc;
+            NumParams -> AccDiff;
+            NumParams -> Oak17Acc;
+            AccDiff -> Oak17Acc;
+        }
+        """
+    VARS = nodes
+    current_df  = loss_df[nodes].copy()
+    current_df[["NumParams"]] = current_df[["NumParams"]].apply(pd.to_numeric)
+    scaler = sklearn.preprocessing.StandardScaler()
+    current_df[VARS] = scaler.fit_transform(current_df[VARS])
+
+    # normalize the data
+    scaler = sklearn.preprocessing.MinMaxScaler()
+    current_df[VARS] = scaler.fit_transform(current_df[VARS])
+
+    print(current_df)
+    model1 = CausalModel(
+        data=current_df,
+        treatment='NumParams',
+        treatment_is_binary=False,
+        outcome=attack,
+        graph=graph1.replace("\n", " "))
+
+    #model1.view_model() #file_name='dowhy-{}-causal_model.png'.format(attack))
+    model1.view_model(file_name='example_1_2-{}-causal_model'.format(attack))
+
+    # II. Identify causal effect and return target estimands
+    identified_estimand = model1.identify_effect(proceed_when_unidentifiable=True)
+    print('Identified estimand: {}'. format(identified_estimand))
+
+    print('='*60)
+    # III. Estimate the target estimand using a statistical method.
+    # propensity_score only for binary treatment variables
+    causal_estimate = model1.estimate_effect(identified_estimand,
+                                            method_name="backdoor.linear_regression",
+                                            control_value=min(current_df['NumParams']),
+                                            treatment_value=max(current_df['NumParams']),
+                                            confidence_intervals=True,
+                                            test_significance=True)
+    print("Causal Estimate is")
+    print(causal_estimate)
+
+
+
+
 def run_example_2_paper(dataset, wd):
     df = pd.read_csv(dataset, skip_blank_lines=True)
     df = df.loc[df['WeightDecay'] == wd]
@@ -566,8 +672,10 @@ if __name__ == "__main__":
 
     print(args.run_example)
     if args.run_example == '1':
-        # Example 1 from the paper is in script `statistical_analysis.py`
-        #run_example_1_paper(args.dataset, args.wd)
+        # Other numbers for example 1 from the paper is in script `statistical_analysis.py`
+        # this example 1 assumes that we have a very simple graph
+        # in the paper, we choose to present the values ultimately coming after the ATE analysis
+        run_example_1_paper(args.dataset, args.wd)
         exit()
     if args.run_example == '2':
         run_example_2_paper(args.dataset, args.wd)
