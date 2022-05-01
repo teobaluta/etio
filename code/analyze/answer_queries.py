@@ -607,10 +607,10 @@ def causal_w_bnlearn_graph(df, graph_dot_dict, output_csv_filename, run_refuters
                                                        'ThresholdAcc': '\\threshacc'})
         sorted_df['Feature'] = sorted_df['Feature'].map({'TrainVar': '\\trainvar',
                                                          'TestVar': '\\testvar',
-                                                         'AccDiff': '\\accdiff',
-                                                         'TrainSize': '\\trainsize',
                                                          'TrainBias2': '\\trainbias',
                                                          'TestBias2': '\\testbias',
+                                                         'AccDiff': '\\accdiff',
+                                                         'TrainSize': '\\trainsize',
                                                          'NumParams': '\\numparams',
                                                          'CentroidDistance.origin.': '\centroid',
                                                          'CentroidDistance.sorted_3.': '\centroid'})
@@ -631,6 +631,8 @@ def causal_w_bnlearn_graph(df, graph_dot_dict, output_csv_filename, run_refuters
                                                        'ThresholdAcc': '\\threshacc'})
         sorted_df['Feature'] = sorted_df['Feature'].map({'TrainVar': '\\trainvar',
                                                          'TestVar': '\\testvar',
+                                                         'TrainBias2': '\\trainbias2',
+                                                         'TestBias2': '\\testbias2',
                                                          'AccDiff': '\\accdiff',
                                                          'TrainSize': '\\trainsize',
                                                          'NumParams': '\\numparams',
@@ -692,7 +694,7 @@ if __name__ == "__main__":
                 graph_dot_dict[loss][attack] = filename
 
     if args.filename is None:
-        output_csv_filename = 'dowhy_causal_estimates-{}.csv'.format(args.wd)
+        output_csv_filename = 'causal_estimates-{}.csv'.format(args.wd)
     else:
         output_csv_filename = args.filename
     main(args.dataset, graph_dot_dict, args.wd, output_csv_filename, args.run_refuters)
