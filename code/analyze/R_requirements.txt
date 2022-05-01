@@ -1,0 +1,27 @@
+# R 4.1.0
+# Packages required for bnlearn
+install.packages("bnlearn")
+install.packages("BiocManager")
+#install.packages("Rgraphviz")
+#install.packages("graph")
+# graph might break but the pcalg installation should still work
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+		BiocManager::install(c("graph", "RBGL", "Rgraphviz"))
+
+# Pacakges required for cdt
+# https://github.com/Diviyan-Kalainathan/RCIT
+install.packages("momentchi2")
+install.packages("MASS")
+# had issues installing devtools
+# tried installing the package usethis manually
+# gert installation failed -> https://github.com/aspiers/git-deps/issues/85
+# try installing with dependencies=TRUE
+install.packages("devtools", dependencies=TRUE)
+# To install RCIT, run this in the R console
+library(devtools)
+install_github("Diviyan-Kalainathan/RCIT")
+library(RCIT)
+install.packages("pcalg")
+# The rest of the packages are found at https://github.com/FenTechSolutions/CausalDiscoveryToolbox/blob/master/r_requirements.txt
+install.packages("comprehenr")
