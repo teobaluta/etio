@@ -214,9 +214,9 @@ run_example_paper = function(dataset) {
 
 check_hypotheses = function(dataset, loss_types, attacks, outdir, discretize_opt, weight_decay) {
   print(names(dataset))
-  hypotheses = vector(mode="list", length=9)
-  names(hypotheses) = c("Oak17Acc", "Top3MLLeakAcc", "MLLeakAcc", "MLLeakLAcc", "Top3MLLeakLAcc", "ThresholdAcc",
-                        "MemguardMemInfAcc", "MemguardNonmemInfAcc", "MemguardInfAcc")
+  hypotheses = vector(mode="list", length=6)
+  names(hypotheses) = c("Oak17Acc", "Top3MLLeakAcc", "MLLeakAcc", "MLLeakLAcc", "Top3MLLeakLAcc", "ThresholdAcc")
+                        #"MemguardMemInfAcc", "MemguardNonmemInfAcc", "MemguardInfAcc")
   hypotheses["Oak17Acc"] = list(matrix(c("AccDiff", "Oak17Acc",
                                          "TrainVar", "Oak17Acc",
                                          "TestVar", "Oak17Acc",
@@ -393,7 +393,9 @@ main = function(args) {
     stop("Expecting: Rscript refute_hypotheses.R <path_to_dataset> <outdir_path> <none/loss> <hybrid/discretize/cont> <float_wd>")
   }
 
-  dataset = na.omit(read.csv(args[1]))
+  # to omit entries with missing fields
+  #dataset = na.omit(read.csv(args[1]))
+  dataset = read.csv(args[1])
   if (args[2] == "run_example") {
     cate_example = run_example_paper(dataset)
     print(cate_example)
