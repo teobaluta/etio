@@ -37,45 +37,53 @@ df.loc[df["TrainSize"] == "1k", "TrainSize"] = 1000.0
 df[["TrainSize"]] = df[["TrainSize"]].apply(pd.to_numeric)
 df[["NumParams"]] = df[["NumParams"]].apply(pd.to_numeric)
 
-# scaler = sklearn.preprocessing.StandardScaler()
-# df[TREATMENT_VARS[attack]] = scaler.fit_transform(df[TREATMENT_VARS[attack]])
+scaler = sklearn.preprocessing.StandardScaler()
+df[TREATMENT_VARS[attack]] = scaler.fit_transform(df[TREATMENT_VARS[attack]])
 
-# # normalize the data
-# scaler = sklearn.preprocessing.MinMaxScaler()
-# df[TREATMENT_VARS[attack]] = scaler.fit_transform(df[TREATMENT_VARS[attack]])
+# normalize the data
+scaler = sklearn.preprocessing.MinMaxScaler()
+df[TREATMENT_VARS[attack]] = scaler.fit_transform(df[TREATMENT_VARS[attack]])
 
-plt.scatter(df['AccDiff'], df['Oak17Acc'])
-plt.savefig('all_points.png')
 ce_df = df.loc[(df['Loss'] == 'ce')]
-
-df = df.loc[df['WeightDecay'] == wd]
+ce_df = df.loc[df['WeightDecay'] == wd]
 view1 = ce_df.loc[(ce_df['TrainAcc'] < 0.9) & (ce_df['TestAcc'] > 0.5)]
 view2 = ce_df.loc[(ce_df['TrainAcc'] >= 0.9) & (ce_df['TestAcc'] > 0.8)]
 
-view5 = ce_df.loc[(ce_df["AccDiff"] > 0.2) & (ce_df["AccDiff"] < 1)
+view5 = ce_df.loc[(ce_df["AccDiff"] > 0.0) & (ce_df["AccDiff"] < 1)
                   #& (ce_df['TrainAcc'] > 0.6) #& (ce_df['TestAcc'] > 0.2)
                   ][['AccDiff','NumParams','Width','Dataset','Arch','TrainSize','WeightDecay',
-                     'Oak17Acc','TrainAcc','TestAcc', 'Scheduler?', 'lr','EpochNum']]
+                     'Oak17Acc','TrainAcc','TestAcc', 'TrainVar','Scheduler?', 'lr','EpochNum']]
 cluster1 = view5.loc[(view5['NumParams'] <= 1)
                 & (view5['NumParams'] > 0.02)
-                & (view5['Width'] < 64)
-                & (view5['AccDiff'] < 0.5) # for illustration purposes
+                & (view5['Dataset'] == 'cifar10')
+                & (view5['Arch'] == 'resnet34')
+                & (view5['TrainSize'] == 1.0)
+                & (view5['Scheduler?'] == 'with_scheduler')
                  ]
 cluster2 = view5.loc[(view5['NumParams'] <= 1)
                 & (view5['NumParams'] > 0.02)
-                & (view5['Width'] > 64)
-                & (view5['Width'] <= 256) #
-                & (view5['AccDiff'] < 0.5) # for illustration purposes
+                & (view5['Dataset'] == 'cifar10')
+                & (view5['Arch'] == 'densenet161')
+                & (view5['TrainSize'] == 1.0)
+                & (view5['Scheduler?'] == 'with_scheduler')
                  ]
-cluster3 = view5.loc[(view5['NumParams'] <= 0.02)
-                    & (view5['NumParams'] > 0.01)
-                    & (view5['AccDiff'] > 0.5) # for illustration purposes
-                    ]
+# This shows that the relationship is indeed positive
+cluster3 = view5.loc[(view5['NumParams'] <= 1)
+                & (view5['NumParams'] > 0.02)
+                & (view5['Dataset'] == 'cifar10')
+                & (view5['Arch'] == 'alexnetwol')
+                & (view5['TrainSize'] == 1.0)
+                & (view5['Scheduler?'] == 'with_scheduler')]
 
 plt.scatter(cluster1['AccDiff'], cluster1['Oak17Acc'])
+#plt.savefig('fig1-confounders.png')
+#plt.close()
 plt.scatter(cluster2['AccDiff'], cluster2['Oak17Acc'])
-plt.scatter(cluster3['AccDiff'], cluster3['Oak17Acc'])
+plt.xlabel('The Train-to-test Accuracy Gap')
+plt.ylabel('Multiple Shadow Model Attack Accuracy')
 plt.savefig('fig1-confounders.png')
+#plt.scatter(cluster3['AccDiff'], cluster3['Oak17Acc'])
+#plt.savefig('fig2-confounders.png')
 pd.set_option('display.max_rows', None)
 
 # Check the average treatment effect
