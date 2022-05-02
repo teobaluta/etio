@@ -4,7 +4,7 @@ library(graph)
 library(comprehenr)
 
 get_features = function(attack, weight_decay, with_proxy_pred_vec=FALSE) {
-  if (attack == "Top3MLLeakLAcc" || attack == "Top3MLLeakAcc" || grepl("InfAcc", attack, fixed = TRUE)) {
+  if (attack == "Top3MLLeakLAcc" || attack == "Top3MLLeakAcc" || grepl("Memguard", attack, fixed = TRUE)) {
     features = c("TrainAcc", "TestAcc", "AccDiff",
                  "TrainLoss", "TestLoss",
                  "LossDiff",
@@ -216,7 +216,6 @@ check_hypotheses = function(dataset, loss_types, attacks, outdir, discretize_opt
   print(names(dataset))
   hypotheses = vector(mode="list", length=6)
   names(hypotheses) = c("Oak17Acc", "Top3MLLeakAcc", "MLLeakAcc", "MLLeakLAcc", "Top3MLLeakLAcc", "ThresholdAcc")
-                        #"MemguardMemInfAcc", "MemguardNonmemInfAcc", "MemguardInfAcc")
   hypotheses["Oak17Acc"] = list(matrix(c("AccDiff", "Oak17Acc",
                                          "TrainVar", "Oak17Acc",
                                          "TestVar", "Oak17Acc",
@@ -230,17 +229,9 @@ check_hypotheses = function(dataset, loss_types, attacks, outdir, discretize_opt
                                               "NumParams", "Top3MLLeakLAcc",
                                               "CentroidDistance.sorted_3.", "Top3MLLeakLAcc"),
                                 ncol=2, byrow=TRUE, dimnames=list(NULL, c("from", "to"))))
-  hypotheses["MemguardInfAcc"] = list(matrix(c("AccDiff", "MemguardInfAcc",
-                                               "NumParams", "MemguardInfAcc",
-                                               "CentroidDistance.sorted_3.", "MemguardInfAcc"),
-                                    ncol=2, byrow=TRUE, dimnames=list(NULL, c("from", "to"))))
-  hypotheses["MemguardMemInfAcc"] = list(matrix(c("AccDiff", "MemguardMemInfAcc",
-                                                  "NumParams", "MemguardMemInfAcc",
-                                                  "CentroidDistance.sorted_3.", "MemguardMemInfAcc"),
-                                    ncol=2, byrow=TRUE, dimnames=list(NULL, c("from", "to"))))
-  hypotheses["MemguardNonmemInfAcc"] = list(matrix(c("AccDiff", "MemguardNonmemInfAcc",
-                                                     "NumParams", "MemguardNonmemInfAcc",
-                                                     "CentroidDistance.sorted_3.", "MemguardNonmemInfAcc"),
+  hypotheses["MemguardAcc"] = list(matrix(c("AccDiff", "MemguardInfAcc",
+                                            "NumParams", "MemguardInfAcc",
+                                            "CentroidDistance.sorted_3.", "MemguardAcc"),
                                     ncol=2, byrow=TRUE, dimnames=list(NULL, c("from", "to"))))
   hypotheses["MLLeakAcc"] = list(matrix(c("AccDiff", "MLLeakAcc",
                                           "NumParams", "MLLeakAcc",
@@ -263,6 +254,10 @@ check_hypotheses = function(dataset, loss_types, attacks, outdir, discretize_opt
     prefix = sprintf("%s/%s", outdir, loss)
     for (attack in attacks) {
       print(attack)
+      # Some of the stats in memguard have NaN values
+      if (attack == "MemguardAcc") {
+        dataset = na.omit(dataset)
+      }
       for (i in 1:nrow(hypotheses[[attack]])) {
         print("========================== Correlation tests ==========================")
         if (loss == "none") {
@@ -366,7 +361,10 @@ generate_graphs = function(dataset, loss_types, attacks, outdir, alg, discretize
       }
 
       thresh = NULL
-
+      # Some of the stats in memguard have NaN values
+      if (attack == "MemguardAcc") {
+        att_dataset = na.omit(att_dataset)
+      }
       cv_results = best_hold_out(att_dataset, alg, prefix, features, attack, bl, wl, thresh, discretize_opt, with_dk)
       print(sprintf("============== [DONE with %s attack (bn.cv)] ==================", attack))
 
@@ -412,8 +410,7 @@ main = function(args) {
                         "Top3MLLeakLAcc", "Top3MLLeakAcc",
                         "Oak17Acc",
                         "ThresholdAcc",
-                        "MemguardMemInfAcc", "MemguardNonmemInfAcc", "MemguardInfAcc",
-                        "RegAttack")
+                        "MemguardAcc")
   discrete_cols = c("TrainSize", "EpochNum", "WeightDecay")
   binary_cols = c("Loss", "Scheduler.")
 
