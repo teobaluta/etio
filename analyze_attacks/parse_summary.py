@@ -499,7 +499,6 @@ def get_model_id_from_defence_file_name(defence_file):
     return -1
         
 
-# The main function
 def parse_all_attack_acc(base_dir, summary_dir):
     """
     Input: base_dir: The directory is assumed to have following structures:
