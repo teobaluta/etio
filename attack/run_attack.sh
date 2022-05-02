@@ -1,9 +1,5 @@
 #!/bin/bash
-
-# define $loss_fn(= "mse" or "ce"), $config_file, $model_path, $DATA_DIR, $attack_output_dir, $CUDA_VISIBLE_DEVICES, as an environment variable
-
-DATASETS=~/DATASETS/
-
+DATASETS=$root_dir/datasets
 # Added environment variables
 if [[ "$#" -lt 7 ]]; then
 	echo "Expecting arguments dataset, model name, train set size, width, target model_id, shadow model id,
@@ -13,7 +9,7 @@ if [[ "$#" -lt 7 ]]; then
 fi
 
 max_output_shape=$max_output_shape
-echo -e "\n\nUsing max_output_shape = $max_output_shape"
+echo "Using max_output_shape = $max_output_shape"
 force_softmax_for_ce=1
 dataset=$1
 model=$2
@@ -44,7 +40,7 @@ elif [[ $train_size == 5 ]]; then
 fi
 
 if [[ "$#" == 8 && $8 == 'target' ]]; then
-python shadow_model_attack.py --torch_shadow_model_path $model_path/final_model_$model_id.pkl \
+	python shadow_model_attack.py --torch_shadow_model_path $model_path/final_model_$model_id.pkl \
 	--torch_target_model_path $model_path/final_model_$TARGET_MODEL_ID.pkl \
 	--config_file $config_file --idx_file $dataset_path \
 	--data_dir $DATASETS --data_tag $dataset --eval_nm_size $eval_nm_size \
@@ -57,15 +53,15 @@ python shadow_model_attack.py --torch_shadow_model_path $model_path/final_model_
 	--force_softmax_for_ce $force_softmax_for_ce
 else
 	python shadow_model_attack.py --torch_shadow_model_path $model_path/final_model_$model_id.pkl \
-		--torch_target_model_path $model_path/final_model_$TARGET_MODEL_ID.pkl \
-		--shadow_model_id $model_id \
-		--config_file $config_file --idx_file $dataset_path \
-		--data_dir $DATASETS --data_tag $dataset --eval_nm_size $eval_nm_size \
-		--ntrain $ntrain \
-		--target_model_id $TARGET_MODEL_ID  --nm_model_id $NM_MODEL_ID \
-		--attack_type $attack_type \
-		--loss_fn $loss_fn \
-		--attack_model_output_dir $attack_output_dir \
-		--max_output_shape $max_output_shape \
-		--force_softmax_for_ce $force_softmax_for_ce
+	--torch_target_model_path $model_path/final_model_$TARGET_MODEL_ID.pkl \
+	--shadow_model_id $model_id \
+	--config_file $config_file --idx_file $dataset_path \
+	--data_dir $DATASETS --data_tag $dataset --eval_nm_size $eval_nm_size \
+	--ntrain $ntrain \
+	--target_model_id $TARGET_MODEL_ID  --nm_model_id $NM_MODEL_ID \
+	--attack_type $attack_type \
+	--loss_fn $loss_fn \
+	--attack_model_output_dir $attack_output_dir \
+	--max_output_shape $max_output_shape \
+	--force_softmax_for_ce $force_softmax_for_ce
 fi
