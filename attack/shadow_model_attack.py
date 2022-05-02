@@ -8,7 +8,7 @@ sys.path.append('../')
 from trainer import train
 from trainer import models
 import estimator
-import estimator.prepare_dataset as prep_data
+import loader.prepare_dataset as prep_data
 import tensorflow as tf
 from tensorflow.compat.v1.train import Saver
 from tensorflow import keras
@@ -16,7 +16,7 @@ import argparse
 import pickle as pkl
 
 import ml_leaks
-import privacy_meter
+#import privacy_meter
 
 # Use only one GPU to easily avoid having tensors on different GPUs
 TARGET_MODEL_ID = 1

@@ -66,7 +66,7 @@ The memguard defence code is in the `defence` module with the script `memguard.p
 
 ## 6. Collecting Statistics
 We store the trained models and attack models in a folder with following structure:
-```
+```bash
     ├─────────────────────────────────── 
     │root_dir
     │── datasets

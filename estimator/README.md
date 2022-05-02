@@ -29,7 +29,7 @@ To compute the centroid, use the script `get_centroid.py` in two modes. All of t
 First, the `one_setup` mode where we can manually specify a list of settings (i.e., arch, width, dataset, etc.) for which to compute the centroid.
 
 For example:
-```
+```bash
 python get_centroid.py one_setup --data_dir root_dir/datasets/ --model_dirs root_dir/models/models-wd_5e3/  --data_idx root_dir/datasets/prepare_data-data_cifar10-ntrial_3-train_size_1000-test_size_10000-strategy_disjoint_split-seed_0.npz --losses ce --datasets cifar10 --archs resnet34 --widths 256 --ntrains 1k --repeat_num 3 --epoch_nums 500 --schedulers with_scheduler --model_num_per_repeat 50
 ```
 To run for the models trained without scheduler, simply change the option `--schedulers with_scheduler` to `--schedulers with_scheduler,without_scheduler`.
@@ -37,7 +37,7 @@ To run for the models trained without scheduler, simply change the option `--sch
 Second, to run for all of our training setups (which we have specified in the `get_centroid.py`) given the path to the models and the path to the data directory (where the datasets and the index files exist) use the `all` mode.
 
 For example:
-```
+```bash
  python get_centroid.py all --data_dir root_dir/datasets/ --model_dirs root_dir/models/models-wd_5e3/
 ```
 

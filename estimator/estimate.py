@@ -488,7 +488,7 @@ def log_args(args, out_dir):
     utils.write_txt(out_path, in_str)
 
 
-def analyze_each_setup(data_dir, setup_dir_path, FORCE_STAT_REFRESH = False, failed_stat_log_path = None):
+def analyze_each_setup(data_dir, setup_dir_path, FORCE_STAT_REFRESH = False):
     print("Starting %s" % setup_dir_path)
     config_path = os.path.join(setup_dir_path, "config.ini")
 
@@ -524,12 +524,9 @@ def analyze_each_setup(data_dir, setup_dir_path, FORCE_STAT_REFRESH = False, fai
 
     if not valid_stat:
         print("Sanity test failed...")
-        if failed_stat_log_path:
-            with open(failed_stat_log_path, "a+") as f:
-                f.writelines([setup_dir_path + "\n"]) # write to log if path provided
-                f.flush()
 
     if valid_stat and not FORCE_STAT_REFRESH and os.path.exists(out_path):
+        # We return the stats from the existing file if it is a valid stat, and we are not forced to refresh the stat, and the file exists
         stats = utils.read_pkl(out_path)
         avg_test_loss, avg_test_acc, avg_test_var, avg_test_bias2, avg_train_loss, avg_train_acc, avg_train_var, avg_train_bias2 = get_stats(stats)
         print("Loaded computed stats ...")
@@ -699,16 +696,9 @@ def analyze_each_setup(data_dir, setup_dir_path, FORCE_STAT_REFRESH = False, fai
 
 
 if __name__  == "__main__":
-    GPU_ID = sys.argv[4]
-    assert(int(GPU_ID)>= 0)
-
-    os.environ['CUDA_VISIBLE_DEVICES'] = GPU_ID
     data_dir = sys.argv[1]
     setup_dir_path = sys.argv[2]
-    FORCE_STAT_REFRESH = True if sys.argv[3].lower() == "force" else False
-    failed_stat_log_path = None
-    if len(sys.argv) == 6:
-        failed_stat_log_path = sys.argv[5]
-        print("Logging bad stats in file: ", failed_stat_log_path)
-    analyze_each_setup(data_dir, setup_dir_path, FORCE_STAT_REFRESH, failed_stat_log_path)
-
+    GPU_ID = sys.argv[3]
+    assert(int(GPU_ID)>= 0)
+    os.environ['CUDA_VISIBLE_DEVICES'] = GPU_ID
+    analyze_each_setup(data_dir, setup_dir_path)
