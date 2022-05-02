@@ -1,13 +1,10 @@
 import numpy as np
 import pandas as pd
 import networkx as nx
-import graphviz
 import matplotlib.pyplot as plt
 import os
-import sys
 
 from dowhy import CausalModel
-import dowhy.datasets
 import pydot
 import argparse
 
@@ -91,7 +88,7 @@ def plot_causal_effect(estimate, treatment, outcome, treatment_name, outcome_nam
 
 
 logging.config.dictConfig(DEFAULT_LOGGING)
-ATTACKS = ['Oak17Acc', 'Top3MLLeakAcc', 'Top3MLLeakLAcc', 'MLLeakAcc', 'MLLeakLAcc', 'ThresholdAcc']
+ATTACKS = ['MemguardAcc', 'Oak17Acc', 'Top3MLLeakAcc', 'Top3MLLeakLAcc', 'MLLeakAcc', 'MLLeakLAcc', 'ThresholdAcc']
 LOSSES = ['ce', 'mse']
 FEATURES = [
     'TrainBias2', 'TestBias2',
@@ -109,16 +106,25 @@ TREATMENT_VARS = {
     'Top3MLLeakLAcc': [x for x in FEATURES if x not in ['CentroidDistance.origin.']],
     'MLLeakAcc': [x for x in FEATURES if x not in ['CentroidDistance.sorted_3.']],
     'MLLeakLAcc': [x for x in FEATURES if x not in ['CentroidDistance.sorted_3.']],
+    'MemguardAcc': [x for x in FEATURES if x not in ['CentroidDistance.origin.']],
 }
-GRAPH_DIR = 'dowhy-graphs'
+GRAPH_DIR = 'causal-analysis-graphs'
 
 QUERIES_OF_INTEREST = {
-    'Oak17Acc': ['AccDiff', 'TrainVar', 'TestVar', 'TrainSize', 'NumParams'],
-    'Top3MLLeakAcc': ['AccDiff', 'TrainVar', 'TestVar', 'TrainSize', 'NumParams', 'CentroidDistance.sorted_3.'],
-    'Top3MLLeakLAcc': ['AccDiff', 'TrainVar', 'TestVar', 'TrainSize', 'NumParams', 'CentroidDistance.sorted_3.'],
-    'MLLeakAcc': ['AccDiff', 'TrainVar', 'TestVar', 'TrainSize', 'NumParams', 'CentroidDistance.origin.'],
-    'MLLeakLAcc': ['AccDiff', 'TrainVar', 'TestVar', 'TrainSize', 'NumParams', 'CentroidDistance.origin.'],
-    'ThresholdAcc': ['AccDiff', 'TrainVar', 'TestVar', 'TrainSize', 'NumParams']
+    'Oak17Acc': ['AccDiff', 'LossDiff', 'TrainVar', 'TestVar', 'TrainBias2', 'TestBias2',
+                 'TrainSize', 'NumParams'],
+    'Top3MLLeakAcc': ['AccDiff', 'LossDiff', 'TrainVar', 'TestVar', 'TrainBias2', 'TestBias2',
+                      'TrainSize', 'NumParams', 'CentroidDistance.sorted_3.'],
+    'Top3MLLeakLAcc': ['AccDiff', 'LossDiff', 'TrainVar', 'TestVar', 'TrainBias2', 'TestBias2',
+                       'TrainSize', 'NumParams', 'CentroidDistance.sorted_3.'],
+    'MLLeakAcc': ['AccDiff', 'LossDiff', 'TrainVar', 'TestVar', 'TrainBias2', 'TestBias2',
+                  'TrainSize', 'NumParams', 'CentroidDistance.origin.'],
+    'MLLeakLAcc': ['AccDiff', 'LossDiff', 'TrainVar', 'TestVar', 'TrainBias2', 'TestBias2',
+                   'TrainSize', 'NumParams', 'CentroidDistance.origin.'],
+    'ThresholdAcc': ['AccDiff', 'LossDiff', 'TrainVar', 'TestVar', 'TrainBias2', 'TestBias2',
+                     'TrainSize', 'NumParams'],
+    'MemguardAcc': ['AccDiff', 'LossDiff', 'TrainVar', 'TestVar', 'TrainBias2', 'TestBias2',
+                     'TrainSize', 'NumParams', 'CentroidDistance.sorted_3.']
 }
 
 import keras
@@ -473,18 +479,26 @@ def causal_w_bnlearn_graph(df, graph_dot_dict, output_csv_filename, run_refuters
             plt.clf()
 
             current_df = loss_df[TREATMENT_VARS[attack] + [attack]].copy()
+            # Because we only do Memguard for normal weight decay models
+            if attack == "MemguardAcc":
+                #Ignore missing values
+                if current_df.isnull().values.any():
+                   print('Warning! Dataset contains missing values!')
+                   current_df = current_df.dropna()
+
             # Not nice, hard-coded preprocessing
             current_df.loc[current_df["TrainSize"] == "5k", "TrainSize"] = 5000.0
             current_df.loc[current_df["TrainSize"] == "1k", "TrainSize"] = 1000.0
             current_df[["TrainSize"]] = current_df[["TrainSize"]].apply(pd.to_numeric)
             current_df[["NumParams"]] = current_df[["NumParams"]].apply(pd.to_numeric)
+            # Not a lot of difference with or without standardizing and normalizing the data
             # standardise the data
-            scaler = sklearn.preprocessing.StandardScaler()
-            current_df[TREATMENT_VARS[attack]] = scaler.fit_transform(current_df[TREATMENT_VARS[attack]])
+            # scaler = sklearn.preprocessing.StandardScaler()
+            # current_df[TREATMENT_VARS[attack]] = scaler.fit_transform(current_df[TREATMENT_VARS[attack]])
 
-            # normalize the data
-            scaler = sklearn.preprocessing.MinMaxScaler()
-            current_df[TREATMENT_VARS[attack]] = scaler.fit_transform(current_df[TREATMENT_VARS[attack]])
+            # # normalize the data
+            # scaler = sklearn.preprocessing.MinMaxScaler()
+            # current_df[TREATMENT_VARS[attack]] = scaler.fit_transform(current_df[TREATMENT_VARS[attack]])
 
             from sklearn.model_selection import train_test_split
 
@@ -550,12 +564,6 @@ def causal_w_bnlearn_graph(df, graph_dot_dict, output_csv_filename, run_refuters
                     range_random_est_effect = range_random_refuter.estimated_effect
                     range_random_new_effect = range_random_refuter.new_effect
 
-                    # checks whether the estimator returns an estimate value of 0 when the action variable
-                    # is replaced by a random variable, independent of all other variables.
-                    # cate_placebo_refute_results = model.refute_estimate(identified_estimand, causal_estimate,
-                    #                                                     method_name="placebo_treatment_refuter")
-                    # print(cate_placebo_refute_results)
-
                     # random subset validation
                     range_subset_refuter = model.refute_estimate(
                         identified_estimand,
@@ -604,12 +612,14 @@ def causal_w_bnlearn_graph(df, graph_dot_dict, output_csv_filename, run_refuters
                                                        'Top3MLLeakAcc': '\mlleaktopacc',
                                                        'Top3MLLeakLAcc': '\mlleaktoplacc',
                                                        'Oak17Acc': '\oakacc',
-                                                       'ThresholdAcc': '\\threshacc'})
+                                                       'ThresholdAcc': '\\threshacc',
+                                                       'MemguardAcc': '\memguard'})
         sorted_df['Feature'] = sorted_df['Feature'].map({'TrainVar': '\\trainvar',
                                                          'TestVar': '\\testvar',
                                                          'TrainBias2': '\\trainbias',
                                                          'TestBias2': '\\testbias',
                                                          'AccDiff': '\\accdiff',
+                                                         'LossDiff': '\lossdiff',
                                                          'TrainSize': '\\trainsize',
                                                          'NumParams': '\\numparams',
                                                          'CentroidDistance.origin.': '\centroid',
@@ -628,12 +638,14 @@ def causal_w_bnlearn_graph(df, graph_dot_dict, output_csv_filename, run_refuters
                                                        'Top3MLLeakAcc': '\mlleaktopacc',
                                                        'Top3MLLeakLAcc': '\mlleaktoplacc',
                                                        'Oak17Acc': '\oakacc',
-                                                       'ThresholdAcc': '\\threshacc'})
+                                                       'ThresholdAcc': '\\threshacc',
+                                                       'MemguardAcc': '\memguard'})
         sorted_df['Feature'] = sorted_df['Feature'].map({'TrainVar': '\\trainvar',
                                                          'TestVar': '\\testvar',
-                                                         'TrainBias2': '\\trainbias2',
-                                                         'TestBias2': '\\testbias2',
+                                                         'TrainBias2': '\\trainbias',
+                                                         'TestBias2': '\\testbias',
                                                          'AccDiff': '\\accdiff',
+                                                         'LossDiff': '\lossdiff',
                                                          'TrainSize': '\\trainsize',
                                                          'NumParams': '\\numparams',
                                                          'CentroidDistance.origin.': '\centroid',
@@ -647,15 +659,12 @@ def main(dataset, graph_dot_dict, wd, output_csv_filename, run_refuters):
     # This checks that the graph is initialized from the dot file
     #nx.draw_networkx(graph)
     #plt.show()
-    df = pd.read_csv(dataset, skip_blank_lines=True)
+    df = pd.read_csv(dataset) #, skip_blank_lines=True)
     df = df.loc[df['WeightDecay'] == wd]
     df.rename(columns={'CentroidDistance(origin)': 'CentroidDistance.origin.',
                        'CentroidDistance(sorted_3)': 'CentroidDistance.sorted_3.'},
               inplace=True)
-    # Ignore missing values
-    if df.isnull().values.any():
-        print('Warning! Dataset contains missing values!')
-        df = df.dropna()
+
     print('Using the bnlearn graphs to do causal analysis')
     causal_w_bnlearn_graph(df, graph_dot_dict, output_csv_filename, run_refuters)
 
