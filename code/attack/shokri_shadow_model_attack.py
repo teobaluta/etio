@@ -269,6 +269,7 @@ def perform_attack(args, seed, attack_log_path):
         print("Attack model data loaded from the file.")
 
 
+
     # we create attack model for each class and train them
     train_batch_size = int(attack_train_config["train_batch_size"])
     test_batch_size = int(attack_train_config["test_batch_size"])

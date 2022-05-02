@@ -47,24 +47,33 @@ pip install tqdm matplotlib
 More details about each step can be found in `README.md` in each folder (e.g., `estimator` and `trainer`).
 
 
-**3. Performing Attacks**
+**3. Attacks**
 Attacks can be performed with the scripts in the `attack` module. The details are in `README.md` file in `attack` folder.
+
+Following attacks are available in this module:
+1. MLleaks Attack
+2. Oakland Shadow Model Attack
+3. Threshold Attack
+
+
+**4. Defences**
+The memguard defence code is in the `defence` module with the script `memguard.py`.
 
 **4. Collecting Statistics**
 We store the trained models and attack models in a folder with following structure:
 ```
-    ├──────────────────────────────────── 
-    │base_dir
+    ├─────────────────────────────────── 
+    │root_dir
     │── datasets
     │── mlleaks-attacks
-    │   ├── mlleaks-attacks-wd_5e3                                  
-    │   │   ├── epoch_400                   
-    │   │   └── epoch_500                           
+    │   ├── mlleaks-attacks-wd_5e3
+    │   │   ├── epoch_400
+    │   │   └── epoch_500
     │   └── mlleaks-attacks-wd_5e4
-    │   │   ├── epoch_400        
-    │   │   └── epoch_500                   
-    ├── mlleaks_top3-attacks                    
-    │   ├── mlleaks_top3-attacks-wd_5e3                 
+    │   │   ├── epoch_400
+    │   │   └── epoch_500
+    ├── mlleaks_top3-attacks
+    │   ├── mlleaks_top3-attacks-wd_5e3 
     │   │   ├── epoch_400
     │   │   ├── epoch_500 
     │   └── mlleaks_top3-attacks-wd_5e4 
@@ -75,7 +84,6 @@ We store the trained models and attack models in a folder with following structu
     │   │   ├── epoch_400
     │   │   └── epoch_500
     │   └── oak17-attacks-wd_5e4
-    │       ├── bad-stuff
     │       ├── epoch_400
     │       └── epoch_500
     ├───────────────────────────────────
@@ -86,6 +94,8 @@ To generate the summary of all trained models, along with the attacks performed 
 ```bash
 python3 analyze_attacks/parse_summary.py <base_dir> <summary_dir>
 ```
+
+Executing this script will store all the summary inside the folder `<summary_dir>/full-summary.csv`.
 
 
 

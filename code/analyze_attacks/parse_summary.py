@@ -525,7 +525,6 @@ def parse_all_attack_acc(base_dir, summary_dir):
     │   │   ├── epoch_400
     │   │   └── epoch_500
     │   └── oak17-attacks-wd_5e4
-    │       ├── bad-stuff
     │       ├── epoch_400
     │       └── epoch_500
     ├───────────────────────────────────

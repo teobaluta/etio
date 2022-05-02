@@ -79,33 +79,6 @@ def get_model_and_train_params(input_dir):
         pass
     return params
 
-def get_avg_train_loss(stats_file, params):
-    data = []
-    with open(stats_file) as f:
-        reader = csv.reader(f, delimiter=",")
-        for row in reader:
-            data.append(row)
-
-    train_loss_idx = data[0].index("TrainLoss")
-    attr_idx_dict = {}
-    for key in params:
-        try:
-            idx = data[0].index(key)
-        except:
-            pass
-        else:
-            attr_idx_dict[key] = idx
-    for item in data[1:]:
-        tag = True
-        for key in attr_idx_dict:
-            if str(item[attr_idx_dict[key]]) != str(params[key]):
-                tag = False
-                break
-        if tag:
-            avg_train_loss = item[train_loss_idx]
-            return float(avg_train_loss)
-    raise Exception("Error: Cannot find the avg train loss for this setup ... %s" % str(params))
-
 def compute_loss_ce(model, loader, class_num):
     model.eval()
     individual_loss_array = []
@@ -192,38 +165,33 @@ TrainSize = {
 }
 
 def main():
+    data_dir = sys.argv[1]
+    setup_dir_path = sys.argv[2]
     GPU_ID = sys.argv[3]
     assert(int(GPU_ID)>= 0)
     os.environ['CUDA_VISIBLE_DEVICES'] = GPU_ID
-    data_dir = sys.argv[1]
-    setup_dir_path = sys.argv[2]
 
     model_dir = os.path.join(setup_dir_path, "models")
     config_file = os.path.join(setup_dir_path, "config.ini")
-    old_path = os.path.join(setup_dir_path, "results-threshold_csf.pkl")
-    out_path = os.path.join(setup_dir_path, "new-results-threshold_csf.pkl")
-    if False and os.path.exists(out_path):
+    out_path = os.path.join(setup_dir_path, "results-threshold_csf.pkl")
+    if os.path.exists(out_path):
         print("Results for threshold attack are ready ... %s" % out_path)
+        acc_dict = utils.read_pkl(out_path)
+        print("Threshold Dict:", acc_dict)
     else:
         if os.path.exists(config_file) == False:
             raise Exception("Error: Cannot find the file ... %s" % config_file)
-        old_acc_dict = utils.read_pkl(old_path)
-        print("Old Threshold Dict:", old_acc_dict)
         train_config, model_config = train.load_config(config_file)
-
         params = get_model_and_train_params(setup_dir_path)
-#        avg_train_loss = get_avg_train_loss(args.stats_file, params)
         stat_path = os.path.join(setup_dir_path, "stats.pkl")
         stats = utils.read_pkl(stat_path)
         avg_test_loss, avg_test_acc, avg_test_var, avg_test_bias2, avg_train_loss, avg_train_acc, avg_train_var, avg_train_bias2 = estimate.get_stats(stats)
-
         if params["Loss"] == "mse":
             compute_loss_fn = compute_loss_mse
         elif params["Loss"] == "ce":
             compute_loss_fn = compute_loss_ce
         else:
             raise Exception("Error: Undefined loss ... %s" % params["Loss"])
-
         # load data
         train_set, test_set = train.load_complete_data(params["Dataset"], data_dir)
         # load idx data
@@ -244,7 +212,6 @@ def main():
             print("Repeat Id: ", repeat_id)
             repeat_id += 1
         acc_dict["threshold"] = avg_train_loss
-
         utils.write_pkl(out_path, acc_dict)
 
 
