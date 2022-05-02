@@ -114,7 +114,7 @@ MemguardAccFields = ["MemguardMemberAcc", "MemguardNonmemberAcc", "MemguardAcc"]
 
 ThresholdField = ["ThresholdMemAcc", "ThresholdNonMemAcc", "ThresholdAcc", "Threshold"]
 RECORD_FIELDS = []
-RECORD_FIELDS += model_identity_fieldnames
+RECORD_FIELDS += ModelIdentityFields
 RECORD_FIELDS += NumParams
 RECORD_FIELDS += StatHeader
 RECORD_FIELDS += ComputeTagsName
@@ -127,7 +127,7 @@ RECORD_FIELDS += Oak17Fields
 RECORD_FIELDS += ThresholdField
 RECORD_FIELDS += MemguardStatHeader
 RECORD_FIELDS += MemguardAccFields
-MISSING_RECORD_HEADER = ["AttackName"] + model_identity_fieldnames
+MISSING_RECORD_HEADER = ["AttackName"] + ModelIdentityFields
 
 # Defining Helper Functions
 

@@ -23,52 +23,6 @@ python prepare_dataset.py   \
 
 Instead of creating multiple subsets for training, for saving the space, we save the indexes of training samples being selected for each training subset in the `out_dir`. The file is named with following format: `train_idx_sets-data_<data_tag>-ntrial_<trial_num>-train_size_<size_of_training_subset>-test_size_<size_of_testing_set>-strategy_<strategy>-seed_<random_seed>.npy`
 
-## Compute Bias & Variance
-
-Update 1 March 2022: Moved the `get_statistics.py` to `../analyze/get_model_metrics.py`.
-The methods that were actually computing bias, variance, etc. were moved to `estimate.py` and the
-old `estimate.py` was renamed to `estimate_kurt.py`. So, the `../analyze/get_model_metrics.py`
-calls the methods from `estimator/estimate.py` and `estimator/gather_centroid_distance.py` and
-`estimator/count_params.py`.
-Please check the `README.md` in the `analyze` folder.
-
-[OBSOLETE, MOVED]
-~~1. Scripts for computing the stats for multiple training setup~~
-
-```bash
-cd ./estimator
-python get_statistics.py <train_setup_dir_path> <data_dir_path> <gpu_id> <loss_tag>
-```
-
-~~- `train_setup_dir_path`: The path to the directory which contains the training setup folders of interest for computing the stats.~~
-~~- `train_setup_dir_path`: The path to the directory which contains the training setup folders under `epoch_400` and `epoch_500`. It will automatically extract the stats.~~
-~~- `data_dir_path`: The path to the data directory.~~
-~~- `gpu_id`: The ID of GPU for computing the stats.~~
-~~- `loss_tag`: If you want to write the stats about the loss distribution, please add `--loss_stats`.~~
-
-~~Output:~~
-
-~~- Without `--loss_stats`, you can find the computed stats in the folder `train_setup_dir_path` with the name `stats.csv`.~~
-~~- With `--loss_stats`, you can find the computed stats in the folder `train_setup_dir_path` with the name `detailed_losses.pkl`.~~
-
-2. Scripts for computing the stats for a training setup
-
-Update 1 March 2022: Moved the old `estimate.py` to `estimate_kurt.py`.
-
-```bash
-cd ./estimator
-python estimate_kurt.py -d <data_tag> -dd <data_dir_path> -i <data_idx_file> -c <config_file> -n <model_num_per_repeat> -g <gpu_id> <kurt_tag> <precomp_kurt_tag> <train_tag>
-```
-
-- `data_tag`: The dataset used for training the models. Options: [`cifar100`, `cifar10`, `mnist`]
-- `data_dir_path`: The path to the data directory.
-- `data_idx_file`: The path to the dataset splitting information used for training.
-- `config_file`: The model configuration file used for training.
-- `model_num_per_repeat`: The number of trained models for each random split.
-- `gpu_id`: The ID of GPU for computing the stats.
-- `kurt_tag`: `---kurt` used for determining whether to compute the kurtosis. (This is optional.)
-- `precomp_kurt_tag`: `--prepcomp_kurt` (This is optional.)
-- `train_tag`: `--train` (This is optional.) 
 
 ## Get Centroid
 
