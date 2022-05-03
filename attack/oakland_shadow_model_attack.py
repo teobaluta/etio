@@ -16,7 +16,7 @@ import loader.utils as utils
 from estimator import estimate
 import numpy as np
 from tqdm import tqdm
-import estimator.prepare_dataset as prep_data
+import loader.prepare_dataset as prep_data
 from copy import deepcopy
 from torch.utils.data import Dataset, DataLoader
 import random
