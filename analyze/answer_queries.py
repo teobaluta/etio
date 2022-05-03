@@ -175,58 +175,14 @@ def run_example_1_paper(dataset, wd):
     # draw graph
     attack = 'Oak17Acc'
     nodes = ['AccDiff', 'NumParams'] + [attack]
+    # Controlling for AccDiff when we want to estimate the effect of NumParams
+    # shows a wrong set of assumptions in the causal graph
     graph1 = """
         digraph {
             AccDiff;
             NumParams;
             Oak17Acc;
-            NumParams -> AccDiff;
-            NumParams -> Oak17Acc;
-            AccDiff -> Oak17Acc;
-        }
-        """
-    VARS = nodes
-    current_df  = loss_df[nodes].copy()
-    current_df[["NumParams"]] = current_df[["NumParams"]].apply(pd.to_numeric)
-    scaler = sklearn.preprocessing.StandardScaler()
-    current_df[VARS] = scaler.fit_transform(current_df[VARS])
-
-    # normalize the data
-    scaler = sklearn.preprocessing.MinMaxScaler()
-    current_df[VARS] = scaler.fit_transform(current_df[VARS])
-
-    print(current_df)
-    model1 = CausalModel(
-        data=current_df,
-        treatment='AccDiff',
-        treatment_is_binary=False,
-        outcome=attack,
-        graph=graph1.replace("\n", " "))
-
-    #model1.view_model() #file_name='dowhy-{}-causal_model.png'.format(attack))
-    model1.view_model(file_name='example_1_1-{}-causal_model'.format(attack))
-
-    # II. Identify causal effect and return target estimands
-    identified_estimand = model1.identify_effect(proceed_when_unidentifiable=True)
-    print('Identified estimand: {}'. format(identified_estimand))
-
-    print('='*60)
-    # III. Estimate the target estimand using a statistical method.
-    # propensity_score only for binary treatment variables
-    causal_estimate = model1.estimate_effect(identified_estimand,
-                                            method_name="backdoor.linear_regression",
-                                            control_value=min(current_df['AccDiff']),
-                                            treatment_value=max(current_df['AccDiff']),
-                                            confidence_intervals=True,
-                                            test_significance=True)
-    print("Causal Estimate is")
-    print(causal_estimate)
-    graph2 = """
-        digraph {
-            AccDiff;
-            NumParams;
-            Oak17Acc;
-            NumParams -> AccDiff;
+            AccDiff -> NumParams;
             NumParams -> Oak17Acc;
             AccDiff -> Oak17Acc;
         }
@@ -250,7 +206,7 @@ def run_example_1_paper(dataset, wd):
         graph=graph1.replace("\n", " "))
 
     #model1.view_model() #file_name='dowhy-{}-causal_model.png'.format(attack))
-    model1.view_model(file_name='example_1_2-{}-causal_model'.format(attack))
+    model1.view_model(file_name='example_1_1-{}-causal_model'.format(attack))
 
     # II. Identify causal effect and return target estimands
     identified_estimand = model1.identify_effect(proceed_when_unidentifiable=True)
@@ -267,6 +223,58 @@ def run_example_1_paper(dataset, wd):
                                             test_significance=True)
     print("Causal Estimate is")
     print(causal_estimate)
+    interpretation = causal_estimate.interpret(method_name="textual_effect_interpreter")
+    print(interpretation)
+
+    graph2 = """
+        digraph {
+            AccDiff;
+            NumParams;
+            Oak17Acc;
+            NumParams -> AccDiff;
+            NumParams -> Oak17Acc;
+            AccDiff -> Oak17Acc;
+        }
+        """
+    VARS = nodes
+    current_df  = loss_df[nodes].copy()
+    current_df[["NumParams"]] = current_df[["NumParams"]].apply(pd.to_numeric)
+    scaler = sklearn.preprocessing.StandardScaler()
+    current_df[VARS] = scaler.fit_transform(current_df[VARS])
+
+    # normalize the data
+    scaler = sklearn.preprocessing.MinMaxScaler()
+    current_df[VARS] = scaler.fit_transform(current_df[VARS])
+
+    print(current_df)
+    model2 = CausalModel(
+        data=current_df,
+        treatment='NumParams',
+        treatment_is_binary=False,
+        outcome=attack,
+        graph=graph2.replace("\n", " "))
+
+    #model1.view_model() #file_name='dowhy-{}-causal_model.png'.format(attack))
+    model2.view_model(file_name='example_1_2-{}-causal_model'.format(attack))
+
+    # II. Identify causal effect and return target estimands
+    identified_estimand = model2.identify_effect(proceed_when_unidentifiable=True)
+    print('Identified estimand: {}'. format(identified_estimand))
+
+    print('='*60)
+    # III. Estimate the target estimand using a statistical method.
+    # propensity_score only for binary treatment variables
+    causal_estimate = model2.estimate_effect(identified_estimand,
+                                            method_name="backdoor.linear_regression",
+                                            control_value=min(current_df['NumParams']),
+                                            treatment_value=max(current_df['NumParams']),
+                                            confidence_intervals=True,
+                                            test_significance=True)
+    print("Causal Estimate is")
+    print(causal_estimate)
+    interpretation = causal_estimate.interpret(method_name="textual_effect_interpreter")
+    print(interpretation)
+
 
 
 
@@ -500,19 +508,19 @@ def causal_w_bnlearn_graph(df, graph_dot_dict, output_csv_filename, run_refuters
             # scaler = sklearn.preprocessing.MinMaxScaler()
             # current_df[TREATMENT_VARS[attack]] = scaler.fit_transform(current_df[TREATMENT_VARS[attack]])
 
-            from sklearn.model_selection import train_test_split
+            # from sklearn.model_selection import train_test_split
 
-            train, test = train_test_split(current_df, test_size=0.2)
+            # train, test = train_test_split(current_df, test_size=0.2)
 
             for treatment in TREATMENT_VARS[attack]:
                 print('====== Treatment: {}; Outcome: {} ======'.format(treatment,
                                                                         attack))
-                print('Observed variables: {}'.format(train.columns.tolist()))
+                print('Observed variables: {}'.format(current_df.columns.tolist()))
                 #print('Observed variables: {}'.format(df.columns.tolist()))
                 print('='*80)
                 print('Treatment Variable is {}'.format(treatment))
                 model = CausalModel(
-                    data=train,
+                    data=current_df,
                     treatment=treatment,
                     treatment_is_binary=False,
                     outcome=attack,
@@ -544,7 +552,7 @@ def causal_w_bnlearn_graph(df, graph_dot_dict, output_csv_filename, run_refuters
                     interpretation = causal_estimate.interpret(method_name="textual_effect_interpreter")
                     print(interpretation)
                     if plot:
-                        plot_causal_effect(causal_estimate, test[treatment], test[attack], treatment,
+                        plot_causal_effect(causal_estimate, current_df[treatment], current_df[attack], treatment,
                                         attack, prefix="{}-effect-of_".format(loss))
                     print('='*80)
                     print('================================ Varying Estimator =============================')
