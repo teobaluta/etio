@@ -387,6 +387,7 @@ generate_graphs = function(dataset, loss_types, attacks, outdir, alg, discretize
 }
 
 main = function(args) {
+  set.seed(1)
   if (length(args) < 5) {
     stop("Expecting: Rscript refute_hypotheses.R <path_to_dataset> <outdir_path> <none/loss> <hybrid/discretize/cont> <float_wd>")
   }
@@ -441,6 +442,10 @@ main = function(args) {
 
   if (weight_decay > 0)
     dataset = dataset[dataset$WeightDecay == weight_decay,]
+
+  # We don't have memguard on regularized models
+  if (weight_decay == 0.005)
+    attacks = attacks[-7]
 
   # Because some of these attacks have only been studied for a particular loss
   # we offer the option to split our data based on loss
