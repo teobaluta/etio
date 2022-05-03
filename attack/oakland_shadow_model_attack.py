@@ -12,7 +12,7 @@ from trainer import models
 import attack_models
 from trainer import train
 import torch.optim.lr_scheduler as lr_scheduler
-import estimator.utils as utils
+import loader.utils as utils
 from estimator import estimate
 import numpy as np
 from tqdm import tqdm
