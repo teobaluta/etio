@@ -10,14 +10,14 @@ get_features = function(attack, weight_decay, with_proxy_pred_vec=FALSE) {
                  "LossDiff",
                  "TrainVar", "TestVar", "TrainBias2", "TestBias2",
                  "NumParams", "CentroidDistance.sorted_3.",
-                 "TrainSize") #, "WeightDecay")
+                 "TrainSize")
   } else {
     features = c("TrainAcc", "TestAcc", "AccDiff",
                  "TrainLoss", "TestLoss",
                  "LossDiff",
                  "TrainVar", "TestVar", "TrainBias2", "TestBias2",
                  "NumParams", "CentroidDistance.origin.",
-                 "TrainSize") #, "WeightDecay")
+                 "TrainSize")
   }
   if (with_proxy_pred_vec == TRUE) {
     features = append(features, "U1", "U2")

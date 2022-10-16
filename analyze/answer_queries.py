@@ -51,18 +51,6 @@ plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 
-def plot_treatment_outcome(treatment, outcome, time_var):
-    fig, ax = plt.subplots()
-    tline = ax.plot(time_var, treatment, 'o', label="Treatment")
-    oline = ax.plot(time_var, outcome, 'r^', label="Outcome")
-
-    ax.legend(loc="upper left", bbox_to_anchor=(1.04, 1))
-    plt.xlabel("Time")
-    fig.set_size_inches(8, 6)
-    fig.savefig("obs_data" + datetime.now().strftime("%H-%M-%S") + ".png",
-                bbox_inches="tight")
-
-
 def plot_causal_effect(estimate, treatment, outcome, treatment_name, outcome_name, prefix="effect-of_"):
     fig, ax = plt.subplots()
     x_min = 0
@@ -499,18 +487,6 @@ def causal_w_bnlearn_graph(df, graph_dot_dict, output_csv_filename, run_refuters
             current_df.loc[current_df["TrainSize"] == "1k", "TrainSize"] = 1000.0
             current_df[["TrainSize"]] = current_df[["TrainSize"]].apply(pd.to_numeric)
             current_df[["NumParams"]] = current_df[["NumParams"]].apply(pd.to_numeric)
-            # Not a lot of difference with or without standardizing and normalizing the data
-            # standardise the data
-            # scaler = sklearn.preprocessing.StandardScaler()
-            # current_df[TREATMENT_VARS[attack]] = scaler.fit_transform(current_df[TREATMENT_VARS[attack]])
-
-            # # normalize the data
-            # scaler = sklearn.preprocessing.MinMaxScaler()
-            # current_df[TREATMENT_VARS[attack]] = scaler.fit_transform(current_df[TREATMENT_VARS[attack]])
-
-            # from sklearn.model_selection import train_test_split
-
-            # train, test = train_test_split(current_df, test_size=0.2)
 
             for treatment in TREATMENT_VARS[attack]:
                 print('====== Treatment: {}; Outcome: {} ======'.format(treatment,
@@ -664,9 +640,6 @@ def causal_w_bnlearn_graph(df, graph_dot_dict, output_csv_filename, run_refuters
 
 
 def main(dataset, graph_dot_dict, wd, output_csv_filename, run_refuters):
-    # This checks that the graph is initialized from the dot file
-    #nx.draw_networkx(graph)
-    #plt.show()
     df = pd.read_csv(dataset) #, skip_blank_lines=True)
     df = df.loc[df['WeightDecay'] == wd]
     df.rename(columns={'CentroidDistance(origin)': 'CentroidDistance.origin.',
