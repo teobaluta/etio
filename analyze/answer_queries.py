@@ -153,6 +153,7 @@ def run_dml_estimate(model, identified_estimand, control_value, treatment_value)
 
     return dml_estimate
 
+
 def run_example_1_paper(dataset, wd):
     df = pd.read_csv(dataset, skip_blank_lines=True)
     df = df.loc[df['WeightDecay'] == wd]
@@ -262,9 +263,6 @@ def run_example_1_paper(dataset, wd):
     print(causal_estimate)
     interpretation = causal_estimate.interpret(method_name="textual_effect_interpreter")
     print(interpretation)
-
-
-
 
 
 def run_example_2_paper(dataset, wd):
