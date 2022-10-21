@@ -3,7 +3,7 @@ library(Rgraphviz)
 library(graph)
 library(comprehenr)
 
-get_features = function(attack, weight_decay, with_proxy_pred_vec=FALSE) {
+get_features = function(attack, weight_decay) {
   if (attack == "Top3MLLeakLAcc" || attack == "Top3MLLeakAcc" || grepl("Memguard", attack, fixed = TRUE)) {
     features = c("TrainAcc", "TestAcc", "AccDiff",
                  "TrainLoss", "TestLoss",
@@ -19,9 +19,7 @@ get_features = function(attack, weight_decay, with_proxy_pred_vec=FALSE) {
                  "NumParams", "CentroidDistance.origin.",
                  "TrainSize")
   }
-  if (with_proxy_pred_vec == TRUE) {
-    features = append(features, "U1", "U2")
-  }
+
   if (weight_decay <= 0)
     features = append(features, "WeightDecay")
   return(features)
