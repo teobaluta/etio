@@ -1,5 +1,10 @@
-# ETIO
-### Membership Inference Attacks and Generalization: A Causal Perspective
+
+# Membership Inference Attacks and Generalization: A Causal Perspective
+
+We propose the first approach to explain MI attacks and their connection to generalization based on principled causal reasoning. We offer causal graphs that quantitatively explain the observed MI attack performance achieved for 6 attack variants. 
+This work is by Teodora Baluta, Shiqi Shen, S. Hitarth, Shruti Tople and Prateek Saxena, as published in [CCS 2022](https://arxiv.org/abs/2209.08615).
+
+### ETIO
   
 ## 1. Install an environment manager 
 It is recommended to use an environment management tool like [virtualenv](https://virtualenv.pypa.io/en/stable/) to easily manage the project's requirements and avoid any conflicts with your system packages. If you are using virtualenv, run these commands to set up an environment:
@@ -101,6 +106,11 @@ python3 analyze_attacks/parse_summary.py <base_dir> <summary_dir>
 ```
 
 Executing this script will store all the summary inside the folder `<summary_dir>/full-summary.csv`.
+
+### How to Cite
+
+If you use ETIO, please cite our work.
+
 
 
 
