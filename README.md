@@ -4,9 +4,9 @@
 We propose the first approach to explain MI attacks and their connection to generalization based on principled causal reasoning. We offer causal graphs that quantitatively explain the observed MI attack performance achieved for 6 attack variants. 
 This work is by Teodora Baluta, Shiqi Shen, S. Hitarth, Shruti Tople and Prateek Saxena, as published in [CCS 2022](https://arxiv.org/abs/2209.08615).
 
-### ETIO
+## ETIO
   
-## 1. Install an environment manager 
+### 1. Install an environment manager 
 It is recommended to use an environment management tool like [virtualenv](https://virtualenv.pypa.io/en/stable/) to easily manage the project's requirements and avoid any conflicts with your system packages. If you are using virtualenv, run these commands to set up an environment:
 ```sh
 $ cd into/your/project/folder
@@ -22,7 +22,7 @@ $ python3 -m venv env
 
 At this point, you will have an `env` directory for your virtual environment.
 
-## 2. Install dependencies
+### 2. Install dependencies
 In the root folder (where the requirements.txt file is), run this command to install all dependencies:
 ```sh
 $ pip install -r requirements.txt
@@ -48,7 +48,7 @@ pip install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio===0.7.2 -f ht
 pip install tqdm matplotlib
 ```
 
-## 3. Preparing Datasets andTraining Models
+### 3. Preparing Datasets and Training Models
 
 1. Preparing datasets: please run `./estimator/prepare_dataset.py`
 2. Training models: please run `./trainer/train.py`
@@ -57,7 +57,7 @@ pip install tqdm matplotlib
 More details about each step can be found in `README.md` in each folder (e.g., `estimator` and `trainer`).
 
 
-## 4. Executing Attacks
+### 4. Executing Attacks
 Attacks can be performed with the scripts in the `attack` module. The details are in `README.md` file in `attack` folder.
 
 Following attacks are available in this module:
@@ -69,7 +69,7 @@ Following attacks are available in this module:
 ## 5. Executing Defences for Attacks
 The memguard defence code is in the `defence` module with the script `memguard.py`.
 
-## 6. Collecting Statistics
+### 6. Collecting Statistics
 We store the trained models and attack models in a folder with following structure:
 ```bash
     ├─────────────────────────────────── 
